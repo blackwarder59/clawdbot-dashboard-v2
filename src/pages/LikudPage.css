@@ -1,0 +1,254 @@
+.likud-page {
+  min-height: 100vh;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f5f5f5;
+}
+
+.likud-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.likud-header h1 {
+  color: #1a365d;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.likud-subtitle {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.likud-controls {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.likud-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.likud-filters button {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.likud-filters button:hover {
+  border-color: #3182ce;
+}
+
+.likud-filters button.active {
+  background: #3182ce;
+  color: white;
+  border-color: #3182ce;
+}
+
+.likud-filters button.active.green {
+  background: #48bb78;
+  border-color: #48bb78;
+}
+
+.likud-filters button.active.yellow {
+  background: #ecc94b;
+  border-color: #ecc94b;
+  color: #1a202c;
+}
+
+.likud-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.likud-search {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.likud-search:focus {
+  outline: none;
+  border-color: #3182ce;
+}
+
+.likud-btn-sheets,
+.likud-btn-refresh {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.likud-btn-sheets {
+  background: #6b46c1;
+  color: white;
+}
+
+.likud-btn-sheets:hover {
+  background: #553c9a;
+}
+
+.likud-btn-refresh {
+  background: #4a5568;
+  color: white;
+}
+
+.likud-btn-refresh:hover {
+  background: #2d3748;
+}
+
+.likud-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.likud-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.likud-table thead {
+  background: #3182ce;
+  color: white;
+}
+
+.likud-table th {
+  padding: 1rem;
+  text-align: right;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.likud-table td {
+  padding: 0.875rem 1rem;
+  text-align: right;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.likud-table tbody tr {
+  transition: background 0.2s;
+}
+
+.likud-table tbody tr:hover {
+  background: #f7fafc;
+}
+
+.likud-table tbody tr.has-data {
+  background: #f0fff4;
+}
+
+.likud-table tbody tr.no-data {
+  background: #fffbeb;
+}
+
+.likud-table tbody tr.has-data:hover {
+  background: #e6ffed;
+}
+
+.likud-table tbody tr.no-data:hover {
+  background: #fef5e7;
+}
+
+.likud-loading,
+.likud-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+}
+
+.likud-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #3182ce;
+  border-radius: 50%;
+  animation: likud-spin 1s linear infinite;
+}
+
+@keyframes likud-spin {
+  to { transform: rotate(360deg); }
+}
+
+.likud-error h2 {
+  color: #e53e3e;
+}
+
+.likud-error button {
+  padding: 0.75rem 1.5rem;
+  background: #3182ce;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.likud-empty {
+  padding: 3rem;
+  text-align: center;
+  color: #666;
+}
+
+.likud-footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .likud-page {
+    padding: 1rem;
+  }
+
+  .likud-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .likud-filters,
+  .likud-actions {
+    flex-direction: column;
+  }
+
+  .likud-search {
+    width: 100%;
+  }
+
+  .likud-table {
+    font-size: 0.875rem;
+  }
+
+  .likud-table th,
+  .likud-table td {
+    padding: 0.5rem;
+  }
+}

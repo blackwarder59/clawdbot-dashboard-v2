@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import LikudTable from '../components/LikudTable'
+import './LikudPage.css'
 
 const SHEET_ID = '1oINu6aCW38HJ4hI5ZiKf8C83zuBWf4I6GRGs6z9yfNc'
 const RANGE = 'Sheet1!A1:K202'
@@ -8,7 +8,8 @@ function LikudPage() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [filter, setFilter] = useState('all') // 'all', 'with-data', 'without-data'
+  const [filter, setFilter] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     fetchData()
@@ -17,16 +18,12 @@ function LikudPage() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      // Public Google Sheets API (read-only, no API key needed if sheet is public)
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&range=${RANGE}`
+      setError(null)
       
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&range=${RANGE}`
       const response = await fetch(url)
       const text = await response.text()
-      
-      // Google returns JSONP, need to extract JSON
       const json = JSON.parse(text.substring(47, text.length - 2))
-      
-      // Convert to array format
       const rows = json.table.rows.map(row => 
         row.c.map(cell => cell ? cell.v : '')
       )
@@ -34,8 +31,8 @@ function LikudPage() {
       setData(rows)
       setLoading(false)
     } catch (err) {
-      console.error('Error fetching data:', err)
-      setError(err.message)
+      console.error('Error:', err)
+      setError('שגיאה בטעינת הנתונים. ודא שהקובץ ציבורי.')
       setLoading(false)
     }
   }
@@ -44,98 +41,137 @@ function LikudPage() {
     if (!data.length) return []
     
     const [headers, ...rows] = data
-    
-    if (filter === 'all') return rows
-    if (filter === 'with-data') return rows.filter(row => row[6] === 'יש נתונים')
-    if (filter === 'without-data') return rows.filter(row => row[6] === 'אין נתונים')
-    
-    return rows
+    let filtered = rows
+
+    if (filter === 'with-data') {
+      filtered = filtered.filter(row => row[6] === 'יש נתונים')
+    } else if (filter === 'without-data') {
+      filtered = filtered.filter(row => row[6] === 'אין נתונים')
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter(row =>
+        row.some(cell => 
+          String(cell).toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      )
+    }
+
+    return filtered
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-2xl">טוען נתונים...</div>
+      <div className="likud-loading">
+        <div className="likud-spinner"></div>
+        <p>טוען נתונים...</p>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-red-500">
-          <h2 className="text-2xl font-bold mb-4">שגיאה</h2>
-          <p>{error}</p>
-          <p className="mt-4 text-sm">ודא שה-Sheet הוא ציבורי (read-only)</p>
-        </div>
+      <div className="likud-error">
+        <h2>❌ שגיאה</h2>
+        <p>{error}</p>
+        <button onClick={fetchData}>נסה שוב</button>
       </div>
     )
   }
 
   const headers = data[0] || []
   const rows = filteredData()
+  const withData = data.filter(r => r[6] === 'יש נתונים').length
+  const withoutData = data.filter(r => r[6] === 'אין נתונים').length
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6" dir="rtl">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-4 text-gray-800 dark:text-white">
-            תוצאות מועצות סניפים - ליכוד 2026
-          </h1>
-          
-          <div className="flex gap-4 mb-4">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg ${
-                filter === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white'
-              }`}
-            >
-              הכל ({data.length - 1})
-            </button>
-            <button
-              onClick={() => setFilter('with-data')}
-              className={`px-4 py-2 rounded-lg ${
-                filter === 'with-data'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white'
-              }`}
-            >
-              עם תוצאות ({data.filter(r => r[6] === 'יש נתונים').length})
-            </button>
-            <button
-              onClick={() => setFilter('without-data')}
-              className={`px-4 py-2 rounded-lg ${
-                filter === 'without-data'
-                  ? 'bg-yellow-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white'
-              }`}
-            >
-              ללא תוצאות ({data.filter(r => r[6] === 'אין נתונים').length})
-            </button>
-          </div>
+    <div className="likud-page" dir="rtl">
+      <header className="likud-header">
+        <h1>🗳️ תוצאות מועצות סניפים - ליכוד 2026</h1>
+        <p className="likud-subtitle">
+          סה"כ {data.length - 1} רשימות | {withData} עם תוצאות | {withoutData} ללא תוצאות
+        </p>
+      </header>
 
-          <div className="flex gap-4">
-            <a
-              href={`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-            >
-              📊 פתח ב-Google Sheets
-            </a>
-            <button
-              onClick={fetchData}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-            >
-              🔄 רענן
-            </button>
-          </div>
+      <div className="likud-controls">
+        <div className="likud-filters">
+          <button
+            onClick={() => setFilter('all')}
+            className={filter === 'all' ? 'active' : ''}
+          >
+            הכל ({data.length - 1})
+          </button>
+          <button
+            onClick={() => setFilter('with-data')}
+            className={filter === 'with-data' ? 'active green' : ''}
+          >
+            עם תוצאות ({withData})
+          </button>
+          <button
+            onClick={() => setFilter('without-data')}
+            className={filter === 'without-data' ? 'active yellow' : ''}
+          >
+            ללא תוצאות ({withoutData})
+          </button>
         </div>
 
-        <LikudTable headers={headers} rows={rows} />
+        <div className="likud-actions">
+          <input
+            type="text"
+            placeholder="חפש סניף או שם..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="likud-search"
+          />
+          <a
+            href={`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="likud-btn-sheets"
+          >
+            📊 Google Sheets
+          </a>
+          <button onClick={fetchData} className="likud-btn-refresh">
+            🔄 רענן
+          </button>
+        </div>
       </div>
+
+      <div className="likud-table-container">
+        <table className="likud-table">
+          <thead>
+            <tr>
+              {headers.map((header, i) => (
+                <th key={i}>{header}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => {
+              const status = row[6]
+              const rowClass = status === 'יש נתונים' ? 'has-data' : 'no-data'
+              
+              return (
+                <tr key={i} className={rowClass}>
+                  {row.map((cell, j) => (
+                    <td key={j}>{cell || '-'}</td>
+                  ))}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+
+        {rows.length === 0 && (
+          <div className="likud-empty">
+            <p>אין נתונים להצגה</p>
+          </div>
+        )}
+      </div>
+
+      <footer className="likud-footer">
+        <p>נתונים מעודכנים מ-Google Sheets | לחץ "רענן" לעדכון אחרון</p>
+      </footer>
     </div>
   )
 }
